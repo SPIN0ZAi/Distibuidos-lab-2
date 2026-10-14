@@ -17,13 +17,30 @@ namespace RepartidorApp
                 ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
 
-            var channel = GrpcChannel.ForAddress("http://localhost:5000", new GrpcChannelOptions { HttpHandler = httpHandler });
+            var channel = GrpcChannel.ForAddress("http://172.20.10.3:5000", new GrpcChannelOptions { HttpHandler = httpHandler });
             var client = new RestauranteService.RestauranteServiceClient(channel);
 
             Console.WriteLine("Repartidor iniciado. Esperando pedidos para repartir...");
+            Console.WriteLine("Cliente gRPC del Repartidor");
+            Console.WriteLine("1. Tomar pedido para repartir");
+            Console.WriteLine("2. Salir");
 
             while (true)
             {
+                Console.Write("\nElige una opción (1-2): ");
+                var opcion = Console.ReadLine();
+
+                switch (opcion)
+                {
+                    case "1":
+                        await TomarPedidoParaRepartir(client);
+                        break;
+                    case "2":
+                        return;
+                    default:
+                        Console.WriteLine("Opción no válida");
+                        break;
+                }
                 try
                 {
                     var response = await client.TomarPedidoParaRepartirAsync(new Empty());
@@ -45,5 +62,11 @@ namespace RepartidorApp
                 }
             }
         }
+
+        static async Task TomarPedidoParaRepartir(RestauranteService.RestauranteServiceClient client)
+        {
+        throw new Exception(); // Eliminar y sustituir por el código que implementa el pseudocódigo
+        }
+
     }
 }
