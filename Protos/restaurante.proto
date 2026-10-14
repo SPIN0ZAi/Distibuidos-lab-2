@@ -1,0 +1,35 @@
+syntax = "proto3";
+option csharp_namespace = "Restaurante";
+import "google/protobuf/empty.proto";
+
+service RestauranteService {
+    rpc HacerPedido (PedidoRequest) returns (PedidoResponse);
+    rpc ConsultarEstadoPedido (ConsultaRequest) returns (EstadoResponse);
+    rpc TomarPedidoParaRepartir (google.protobuf.Empty) returns (PedidoResponse);
+    rpc ConsultarPlatosPedido (ConsultaRequest) returns (PedidoResponse);
+}
+
+message PedidoRequest {
+    repeated PlatoPedido platos = 1;
+    int32 distancia = 2;
+}
+
+message PlatoPedido {
+    string nombre = 1;
+    int32 cantidad = 2;
+}
+
+message PedidoResponse {
+    int32 id_pedido = 1;
+    string mensaje = 2;
+}
+
+message ConsultaRequest {
+    int32 id_pedido = 1;
+}
+
+message EstadoResponse {
+    string estado = 1;
+    string mensaje = 2;
+    int32 tiempo_estimado = 3;
+}

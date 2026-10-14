@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Cliente/Cliente.csproj" />
+  <Project Path="Repartidor/Repartidor.csproj" />
+  <Project Path="Restaurante/Restaurante.csproj" />
+</Solution>

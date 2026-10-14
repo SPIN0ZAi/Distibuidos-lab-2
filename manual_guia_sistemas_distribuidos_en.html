@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Distributed Systems - Lab Practice 2: gRPC Restaurant System in .NET 10</title>
+<style>
+    @page {
+        size: A4 portrait;
+        margin: 16mm 14mm 16mm 14mm;
+        @bottom-right {
+            content: "Page " counter(page);
+            font-size: 8pt;
+            color: #64748b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        @bottom-left {
+            content: "Distributed Systems (3rd Year Computer Engineering) · Lab 2: gRPC in .NET 10";
+            font-size: 8pt;
+            color: #64748b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+    }
+
+    @page :first {
+        margin-top: 0;
+        @bottom-right { content: none; }
+        @bottom-left { content: none; }
+    }
+
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+        .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 9.3pt;
+        line-height: 1.5;
+        color: #1e293b;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Premium Cover */
+    .cover {
+        padding: 40px 10px 10px 10px;
+        min-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: center;
+    }
+
+    .cover-top {
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 25px;
+        margin-bottom: 25px;
+    }
+
+    .cover-badge {
+        display: inline-block;
+        background: #1e3a8a;
+        color: #ffffff;
+        font-size: 9.5pt;
+        font-weight: 700;
+        padding: 6px 18px;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 18px;
+    }
+
+    .cover-title {
+        font-size: 27pt;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.15;
+        margin: 0 0 12px 0;
+        letter-spacing: -0.6px;
+    }
+
+    .cover-subtitle {
+        font-size: 13pt;
+        font-weight: 500;
+        color: #334155;
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.4;
+    }
+
+    .cover-card {
+        background: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 22px 28px;
+        text-align: left;
+        max-width: 580px;
+        margin: 20px auto;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .cover-card-grid {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 9px 18px;
+        font-size: 9pt;
+    }
+
+    .cover-card-label {
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+
+    .cover-card-val {
+        color: #0f172a;
+        font-weight: 500;
+    }
+
+    .cover-footer {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 14px;
+        font-size: 8.5pt;
+        color: #64748b;
+        margin-top: 20px;
+    }
+
+    /* Headers */
+    h1 {
+        font-size: 16.5pt;
+        font-weight: 800;
+        color: #0f172a;
+        border-bottom: 2.5px solid #2563eb;
+        padding-bottom: 5px;
+        margin-top: 22px;
+        margin-bottom: 12px;
+        letter-spacing: -0.3px;
+        break-after: avoid;
+    }
+
+    h2 {
+        font-size: 12.5pt;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin-top: 18px;
+        margin-bottom: 8px;
+        border-left: 4px solid #3b82f6;
+        padding-left: 8px;
+        break-after: avoid;
+    }
+
+    h3 {
+        font-size: 10pt;
+        font-weight: 700;
+        color: #334155;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        break-after: avoid;
+    }
+
+    p {
+        margin-top: 0;
+        margin-bottom: 8px;
+        text-align: justify;
+    }
+
+    ul, ol {
+        margin-top: 0;
+        margin-bottom: 8px;
+        padding-left: 18px;
+    }
+
+    li {
+        margin-bottom: 3px;
+    }
+
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0;
+        font-size: 8.5pt;
+    }
+
+    th, td {
+        border: 1px solid #cbd5e1;
+        padding: 6px 9px;
+        text-align: left;
+    }
+
+    th {
+        background: #1e293b;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+        background: #f8fafc;
+    }
+
+    /* Callouts */
+    .callout {
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0;
+        font-size: 8.8pt;
+        border-left: 5px solid;
+    }
+
+    .callout-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+        font-size: 9.3pt;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .callout-body p:last-child {
+        margin-bottom: 0;
+    }
+
+    .callout-exam {
+        background-color: #fffbeb;
+        border-left-color: #d97706;
+        color: #78350f;
+    }
+    .callout-exam .callout-title {
+        color: #92400e;
+    }
+
+    .callout-why {
+        background-color: #eff6ff;
+        border-left-color: #2563eb;
+        color: #1e3a8a;
+    }
+    .callout-why .callout-title {
+        color: #1d4ed8;
+    }
+
+    .callout-warning {
+        background-color: #fff1f2;
+        border-left-color: #e11d48;
+        color: #881337;
+    }
+    .callout-warning .callout-title {
+        color: #be123c;
+    }
+
+    .callout-step {
+        background-color: #ecfdf5;
+        border-left-color: #059669;
+        color: #064e3b;
+    }
+    .callout-step .callout-title {
+        color: #047857;
+    }
+
+    .callout-example {
+        background-color: #f5f3ff;
+        border-left-color: #7c3aed;
+        color: #4c1d95;
+    }
+    .callout-example .callout-title {
+        color: #6d28d9;
+    }
+
+    /* Code cards */
+    .code-card {
+        border: 1px solid #334155;
+        border-radius: 7px;
+        margin: 12px 0;
+        background: #0d1117;
+    }
+
+    .code-header {
+        background: #161b22;
+        padding: 5px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #30363d;
+        font-size: 8pt;
+        color: #c9d1d9;
+        font-weight: 600;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+    }
+
+    .code-lang-badge {
+        background: #238636;
+        color: #ffffff;
+        font-size: 6.8pt;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    .code-body {
+        padding: 7px 12px;
+        overflow-x: auto;
+    }
+
+    .code-body pre {
+        margin: 0;
+        font-family: "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace !important;
+        font-size: 7.7pt !important;
+        line-height: 1.38 !important;
+        background: transparent !important;
+    }
+
+    code.inline {
+        font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+        background: #f1f5f9;
+        color: #0f172a;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-size: 8.2pt;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* SVG diagrams */
+    .diagram-container {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 12px 0;
+        text-align: center;
+    }
+
+    .diagram-caption {
+        font-size: 8pt;
+        font-weight: 600;
+        color: #475569;
+        margin-top: 6px;
+    }
+
+    /* TOC */
+    .toc {
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin: 16px 0;
+    }
+    .toc-title {
+        font-size: 10.5pt;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 8px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 4px;
+    }
+    .toc-list {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        font-size: 8.8pt;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 16px;
+    }
+    .toc-list li {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+    }
+    .toc-item-num {
+        font-weight: 700;
+        color: #2563eb;
+        margin-right: 5px;
+    }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+    <div class="cover-top">
+        <div class="cover-badge">B.S. in Computer Engineering · 3rd Year</div>
+        <h1 class="cover-title">DISTRIBUTED SYSTEMS<br>LAB PRACTICE 2: gRPC IN .NET 10</h1>
+        <div class="cover-subtitle">
+            Comprehensive End-to-End Guide: IDL Contract Design, In-Memory Multithreaded Concurrency, and Distributed Architecture in C#
+        </div>
+    </div>
+
+    <div class="cover-card">
+        <div class="cover-card-grid">
+            <div class="cover-card-label">Course / Subject:</div>
+            <div class="cover-card-val">Distributed Systems / Distributed Computing</div>
+            
+            <div class="cover-card-label">Academic Context:</div>
+            <div class="cover-card-val">Higher Technical School of Computer Engineering (Spain)</div>
+
+            <div class="cover-card-label">Platform & Language:</div>
+            <div class="cover-card-val">.NET 10.0 SDK & C# 13</div>
+
+            <div class="cover-card-label">Middleware / IPC:</div>
+            <div class="cover-card-val">gRPC (Google Remote Procedure Call) over HTTP/2 (h2c)</div>
+
+            <div class="cover-card-label">Contract Format:</div>
+            <div class="cover-card-val">Protocol Buffers v3 (proto3 IDL)</div>
+
+            <div class="cover-card-label">Concurrent Pattern:</div>
+            <div class="cover-card-val">Producer-Consumer with Bounded In-Memory Buffer</div>
+
+            <div class="cover-card-label">Synchronization:</div>
+            <div class="cover-card-val">SemaphoreSlim, ConcurrentQueue, ConcurrentDictionary, lock</div>
+        </div>
+    </div>
+
+    <div class="cover-footer">
+        <strong>Official Lab Manual & Oral Exam Defense Guide</strong><br>
+        Structured with academic rigor to enable students to build the system from scratch, comprehend all theoretical trade-offs, and ace their evaluation.
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc avoid-break">
+    <div class="toc-title">📋 Table of Contents</div>
+    <ul class="toc-list">
+        <li><span><span class="toc-item-num">1.</span> Theoretical Foundations of Distributed Systems</span></li>
+        <li><span><span class="toc-item-num">2.</span> Overall System Architecture</span></li>
+        <li><span><span class="toc-item-num">3.</span> Building the Project from Scratch (CLI)</span></li>
+        <li><span><span class="toc-item-num">4.</span> The Communication Contract (IDL Protobuf)</span></li>
+        <li><span><span class="toc-item-num">5.</span> Project Configuration (.csproj Files)</span></li>
+        <li><span><span class="toc-item-num">6.</span> The Server (Restaurante): Concurrency & State</span></li>
+        <li><span><span class="toc-item-num">7.</span> The Consumer Agent (Repartidor): Worker Loop</span></li>
+        <li><span><span class="toc-item-num">8.</span> The Client Application (Cliente): Interactive UI</span></li>
+        <li><span><span class="toc-item-num">9.</span> Execution Guide & Edge Test Cases</span></li>
+        <li><span><span class="toc-item-num">10.</span> Bank of 10 Typical Oral Exam Questions</span></li>
+        <li><span><span class="toc-item-num">11.</span> Debugging Cheatsheet & Troubleshooting</span></li>
+        <li><span><span class="toc-item-num">12.</span> Conclusion & Key Engineering Takeaways</span></li>
+    </ul>
+</div>
+
+<!-- ========================================== -->
+<!-- MODULE 1: THEORETICAL FOUNDATIONS -->
+<!-- ========================================== -->
+<h1>1. Theoretical Foundations of Distributed Systems</h1>
+
+<p>
+To achieve the highest grade in a 3rd-year European Computer Engineering program, it is never enough to simply "make the code compile". You must understand the conceptual models underlying modern distributed middleware and be able to justify every architectural decision before the evaluation tribunal.
+</p>
+
+<h2>1.1 What is a Remote Procedure Call (RPC)?</h2>
+<p>
+In a classical centralized program, a function is invoked via a <em>Local Procedure Call</em> (LPC): arguments are pushed onto the call stack or processor registers, and the CPU program counter jumps to a memory address within the same virtual address space.
+</p>
+<p>
+In a <strong>Distributed System</strong>, processes run in isolated address spaces across separate operating system processes or distinct physical machines connected over a network. The goal of <strong>RPC (Remote Procedure Call)</strong>, originally formulated by Birrell and Nelson in 1984, is to provide <strong>location transparency</strong>: allowing remote function execution to appear syntactically identical to a local C# method call.
+</p>
+
+
+    <div class="callout callout-why avoid-break">
+        <div class="callout-title">💡 The Location Transparency Principle and Its Physical Limits</div>
+        <div class="callout-body">While RPC achieves <em>syntactic transparency</em>, classical theory (Deutsch's 8 Fallacies of Distributed Computing) proves that <strong>semantic transparency is impossible</strong>:<br>
+• A local call never fails due to router congestion or network cable disconnects.<br>
+• An RPC call can suffer from unpredictable latency, partial partitions, and remote server crashes.<br>
+Consequently, gRPC mandates asynchronous signatures (<code class='inline'>Task</code>), cancellation tokens, and explicit distributed exception handling via <code class='inline'>RpcException</code>.</div>
+    </div>
+    
+
+<h2>1.2 Anatomy of an RPC Call: Stubs and Skeletons</h2>
+<p>
+To shield developers from raw TCP sockets, byte stream parsing, and endianness handling, the RPC middleware automatically synthesizes two intermediaries from an IDL (<em>Interface Definition Language</em>) specification:
+</p>
+<ul>
+    <li><strong>Stub (Client Side):</strong> Acts as a local surrogate or proxy for the remote service. When client code calls <code class="inline">client.HacerPedidoAsync(request)</code>, the Stub intercepts the invocation, serializes parameters into a structured binary frame (<strong>Marshalling</strong>), and transmits it over HTTP/2.</li>
+    <li><strong>Skeleton / Base Service (Server Side):</strong> Receives the inbound network frame, reconstructs the native C# domain objects (<strong>Unmarshalling</strong>), dispatches the execution to your custom method in <code class="inline">RestauranteService</code>, and packages the return value back across the wire.</li>
+</ul>
+
+<!-- STUB SKELETON DIAGRAM -->
+<div class="diagram-container avoid-break">
+    <svg width="600" height="135" viewBox="0 0 600 135" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+            </marker>
+        </defs>
+        <!-- Client -->
+        <rect x="10" y="15" width="120" height="95" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+        <text x="70" y="40" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#1e3a8a">CLIENT (App)</text>
+        <text x="70" y="65" font-family="sans-serif" font-size="8.5" text-anchor="middle" fill="#1e40af">Invokes method</text>
+        <text x="70" y="80" font-family="monospace" font-size="8" text-anchor="middle" fill="#0f172a">HacerPedido()</text>
+
+        <!-- Stub -->
+        <rect x="150" y="15" width="115" height="95" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+        <text x="207" y="40" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#92400e">CLIENT STUB</text>
+        <text x="207" y="65" font-family="sans-serif" font-size="8.5" text-anchor="middle" fill="#78350f">1. Marshalling</text>
+        <text x="207" y="82" font-family="sans-serif" font-size="8.5" text-anchor="middle" fill="#78350f">2. HTTP/2 Send</text>
+
+        <!-- Network -->
+        <path d="M 265 62 L 325 62" stroke="#059669" stroke-width="3" stroke-dasharray="4" marker-end="url(#arrow)"/>
+        <text x="295" y="52" font-family="sans-serif" font-size="7.5" font-weight="bold" text-anchor="middle" fill="#065f46">NETWORK (HTTP/2)</text>
+        <text x="295" y="78" font-family="sans-serif" font-size="7" text-anchor="middle" fill="#047857">Binary Frame</text>
+
+        <!-- Skeleton -->
+        <rect x="330" y="15" width="120" height="95" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+        <text x="390" y="40" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#92400e">SKELETON (Base)</text>
+        <text x="390" y="65" font-family="sans-serif" font-size="8.5" text-anchor="middle" fill="#78350f">3. Unmarshalling</text>
+        <text x="390" y="82" font-family="sans-serif" font-size="8.5" text-anchor="middle" fill="#78350f">4. Dispatch method</text>
+
+        <!-- Server -->
+        <rect x="470" y="15" width="120" height="95" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+        <text x="530" y="40" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#14532d">SERVER (Logic)</text>
+        <text x="530" y="65" font-family="sans-serif" font-size="8.5" text-anchor="middle" fill="#166534">Executes Service</text>
+        <text x="530" y="80" font-family="monospace" font-size="8" text-anchor="middle" fill="#0f172a">RestauranteService</text>
+    </svg>
+    <div class="diagram-caption">Figure 1.1: Distributed RPC invocation flow through Client Stubs and Server Skeletons.</div>
+</div>
+
+<h2>1.3 Why gRPC and Protocol Buffers over REST and JSON?</h2>
+<p>
+While general web applications traditionally rely on REST over HTTP/1.1 with human-readable JSON, high-throughput distributed microservice architectures (e.g., Google, Netflix, Uber) favor gRPC for critical performance reasons:
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Technical Dimension</th>
+            <th>REST Architecture with JSON</th>
+            <th>gRPC with Protocol Buffers</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Message Payload Format</strong></td>
+            <td>Structured plain text (UTF-8). Inefficient in wire size and CPU.</td>
+            <td><strong>Compact binary format</strong> encoded with Varints and field tag delimiters.</td>
+        </tr>
+        <tr>
+            <td><strong>Contract Definition</strong></td>
+            <td>Optional or late (OpenAPI/Swagger). Prone to runtime drift.</td>
+            <td><strong>Strict and mandatory</strong> via IDL (<code class="inline">.proto</code>). Checked at compile time.</td>
+        </tr>
+        <tr>
+            <td><strong>Transport Protocol</strong></td>
+            <td>HTTP/1.1 (or unoptimized HTTP/2). Multiple TCP connections.</td>
+            <td><strong>Pure HTTP/2</strong> with multiplexed streams over a single persistent TCP connection.</td>
+        </tr>
+        <tr>
+            <td><strong>CPU Serialization Cost</strong></td>
+            <td>High: CPU must parse strings, quotes, brackets, and convert numbers to text.</td>
+            <td><strong>Negligible:</strong> Direct byte offsets in RAM. Up to 7-10x faster.</td>
+        </tr>
+        <tr>
+            <td><strong>Streaming Capabilities</strong></td>
+            <td>Complex (requires WebSockets or Server-Sent Events).</td>
+            <td><strong>4 native streaming patterns:</strong> Unary, Client Streaming, Server Streaming, and Bidirectional.</td>
+        </tr>
+    </tbody>
+</table>
+
+
+    <div class="callout callout-example avoid-break">
+        <div class="callout-title">🔍 Visual Example: Network Payload Overhead Comparison</div>
+        <div class="callout-body">To transmit an order with <code class='inline'>id_pedido = 1</code> and <code class='inline'>distancia = 5</code>:<br>
+• <strong>In JSON (REST):</strong> <code class='inline'>{"id_pedido":1,"distancia":5}</code> requires <strong>32 bytes</strong> in plain ASCII text.<br>
+• <strong>In Protobuf:</strong> Encoded into exactly <strong>4 hex bytes</strong>: <code class='inline'>08 01 10 05</code> (Tag 1 = 1, Tag 2 = 5).<br>
+<strong>Result:</strong> An <strong>87.5% reduction in bandwidth consumption</strong> on every single RPC call!</div>
+    </div>
+    
+
+<h2>1.4 Concurrency in a Stateful Distributed Service</h2>
+<p>
+In an in-memory stateful gRPC server, multiple network threads execute incoming requests concurrently. This creates two classic concurrency hazards:
+</p>
+<ol>
+    <li><strong>Compound Race Condition (Check-Then-Act):</strong> If two clients submit an order when the queue has 9 of 10 slots filled, both threads might check <code class="inline">Count &lt; 10</code> at the same time and both enqueue, violating the invariant and exceeding capacity.</li>
+    <li><strong>Thread Starvation via Busy-Waiting:</strong> If the delivery agent constantly polled the queue in a tight loop, it would burn 100% CPU core capacity and exhaust the thread pool.</li>
+</ol>
+
+
+    <div class="callout callout-exam avoid-break">
+        <div class="callout-title">🎓 Exam Question: Why avoid 'Thread.Sleep' or a polling 'while' loop?</div>
+        <div class="callout-body">A loop like <code class='inline'>while (queue.IsEmpty) {{ Thread.Sleep(100); }}</code> holds an OS thread hostage from ASP.NET Core's thread pool.<br>
+Instead, we use an <strong>asynchronous counting semaphore (<code class='inline'>SemaphoreSlim</code>)</strong>: the delivery worker yields its thread non-blockingly via <code class='inline'>await _readyOrdersSemaphore.WaitAsync()</code>, allowing Kestrel to repurpose that thread for other clients. When an order arrives, <code class='inline'>Release()</code> immediately awakes the worker reactively.</div>
+    </div>
+    
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 2: SYSTEM ARCHITECTURE -->
+<!-- ========================================== -->
+<h1>2. Overall System Architecture</h1>
+
+<p>
+The system is divided into three decoupled processes communicating in real time over TCP port 5000 using HTTP/2:
+</p>
+
+<!-- ARCHITECTURE DIAGRAM -->
+<div class="diagram-container avoid-break">
+    <svg width="650" height="250" viewBox="0 0 650 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+            </marker>
+            <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/>
+            </marker>
+            <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+            </marker>
+        </defs>
+
+        <!-- CLIENT NODE -->
+        <g>
+            <rect x="20" y="15" width="165" height="215" rx="8" fill="#f8fafc" stroke="#3b82f6" stroke-width="2"/>
+            <rect x="20" y="15" width="165" height="32" rx="8" fill="#3b82f6"/>
+            <text x="102" y="36" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#ffffff">CLIENT NODE</text>
+            <text x="102" y="62" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#1e3a8a">Terminal 3 (CLI Process)</text>
+            
+            <rect x="30" y="75" width="145" height="36" rx="5" fill="#e0f2fe" stroke="#0284c7"/>
+            <text x="102" y="91" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#0369a1">Console UI (Menu)</text>
+            <text x="102" y="103" font-family="sans-serif" font-size="7" text-anchor="middle" fill="#0284c7">Options: 1, 2, 3</text>
+
+            <rect x="30" y="120" width="145" height="42" rx="5" fill="#e0f2fe" stroke="#0284c7"/>
+            <text x="102" y="136" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#0369a1">RestauranteClienteService</text>
+            <text x="102" y="148" font-family="sans-serif" font-size="7" text-anchor="middle" fill="#0284c7">GrpcChannel (localhost:5000)</text>
+            <text x="102" y="158" font-family="sans-serif" font-size="6.5" text-anchor="middle" fill="#0369a1">Switch: Http2Unencrypted</text>
+
+            <text x="102" y="195" font-family="sans-serif" font-size="8" font-style="italic" text-anchor="middle" fill="#64748b">Role: PRODUCER</text>
+        </g>
+
+        <!-- SERVER NODE (RESTAURANTE) -->
+        <g>
+            <rect x="235" y="15" width="185" height="215" rx="8" fill="#f8fafc" stroke="#10b981" stroke-width="2"/>
+            <rect x="235" y="15" width="185" height="32" rx="8" fill="#10b981"/>
+            <text x="327" y="36" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#ffffff">RESTAURANT SERVER</text>
+            <text x="327" y="62" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#065f46">Kestrel gRPC Host :5000</text>
+
+            <!-- Memory structures -->
+            <rect x="245" y="75" width="165" height="28" rx="4" fill="#dcfce7" stroke="#16a34a"/>
+            <text x="327" y="93" font-family="monospace" font-size="7.5" font-weight="bold" text-anchor="middle" fill="#14532d">_ordersQueue (Max: 10)</text>
+
+            <rect x="245" y="108" width="165" height="28" rx="4" fill="#dcfce7" stroke="#16a34a"/>
+            <text x="327" y="126" font-family="monospace" font-size="7.5" font-weight="bold" text-anchor="middle" fill="#14532d">_allOrders (History Dict)</text>
+
+            <rect x="245" y="141" width="165" height="28" rx="4" fill="#fef3c7" stroke="#d97706"/>
+            <text x="327" y="159" font-family="monospace" font-size="7.5" font-weight="bold" text-anchor="middle" fill="#92400e">_readyOrdersSemaphore</text>
+
+            <rect x="245" y="174" width="165" height="24" rx="4" fill="#fee2e2" stroke="#dc2626"/>
+            <text x="327" y="190" font-family="monospace" font-size="7.5" font-weight="bold" text-anchor="middle" fill="#991b1b">lock (_takeLock)</text>
+
+            <text x="327" y="218" font-family="sans-serif" font-size="7.5" font-style="italic" text-anchor="middle" fill="#64748b">In-Memory Singleton Service</text>
+        </g>
+
+        <!-- DELIVERY WORKER NODE -->
+        <g>
+            <rect x="470" y="15" width="160" height="215" rx="8" fill="#f8fafc" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="470" y="15" width="160" height="32" rx="8" fill="#f59e0b"/>
+            <text x="550" y="36" font-family="sans-serif" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#ffffff">DELIVERY WORKER</text>
+            <text x="550" y="62" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#92400e">Terminal 2 (Daemon Process)</text>
+
+            <rect x="480" y="75" width="140" height="36" rx="5" fill="#fef3c7" stroke="#d97706"/>
+            <text x="550" y="91" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#92400e">Worker Loop</text>
+            <text x="550" y="103" font-family="monospace" font-size="7" text-anchor="middle" fill="#b45309">while (true)</text>
+
+            <rect x="480" y="120" width="140" height="38" rx="5" fill="#fef3c7" stroke="#d97706"/>
+            <text x="550" y="136" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#92400e">Delivery Simulator</text>
+            <text x="550" y="148" font-family="monospace" font-size="7" text-anchor="middle" fill="#b45309">Task.Delay(3000)</text>
+
+            <text x="550" y="195" font-family="sans-serif" font-size="8" font-style="italic" text-anchor="middle" fill="#64748b">Role: CONSUMER</text>
+        </g>
+
+        <!-- COMMUNICATION ARROWS -->
+        <path d="M 185 90 L 235 90" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+        <text x="210" y="84" font-family="sans-serif" font-size="6.8" font-weight="bold" text-anchor="middle" fill="#1e40af">HacerPedido</text>
+
+        <path d="M 185 130 L 235 130" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+        <text x="210" y="124" font-family="sans-serif" font-size="6.8" font-weight="bold" text-anchor="middle" fill="#1e40af">Consultar</text>
+
+        <path d="M 470 95 L 420 95" stroke="#d97706" stroke-width="2" marker-end="url(#arrow-amber)"/>
+        <text x="445" y="89" font-family="sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle" fill="#92400e">TomarPedido</text>
+
+        <path d="M 420 115 L 470 115" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-green)"/>
+        <text x="445" y="127" font-family="sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle" fill="#047857">Assigned</text>
+    </svg>
+    <div class="diagram-caption">Figure 2.1: Physical architecture across the three processes and gRPC communication channels over HTTP/2.</div>
+</div>
+
+<h2>2.1 The Producer-Consumer Pattern with a Bounded Buffer</h2>
+<p>
+The core algorithmic execution adheres to canonical concurrent systems theory:
+</p>
+<ol>
+    <li><strong>The Producer (Client):</strong> Generates order requests via <code class="inline">HacerPedido</code>. It verifies that queue capacity is not exceeded (<code class="inline">MaxQueueCapacity = 10</code>). When the queue is full, the server rejects the order by returning gRPC error <code class="inline">StatusCode.ResourceExhausted</code>.</li>
+    <li><strong>The Bounded Buffer (Restaurant):</strong> Encapsulates a thread-safe <code class="inline">ConcurrentQueue&lt;Pedido&gt;</code> paired with an asynchronous counting semaphore (<code class="inline">SemaphoreSlim</code>) initialized to 0 permits.</li>
+    <li><strong>The Consumer (Delivery Worker):</strong> Requests orders by invoking <code class="inline">TomarPedidoParaRepartir</code>. If no orders exist, it awaits a permit from the semaphore. When a client enqueues an order, <code class="inline">_readyOrdersSemaphore.Release()</code> is called, awakening the worker immediately.</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 3: BUILDING FROM SCRATCH -->
+<!-- ========================================== -->
+<h1>3. Building the Project from Scratch with the .NET CLI</h1>
+
+<p>
+To construct this entire system from an empty directory using only the command line (e.g., during a practical lab exam), execute the following commands in sequence:
+</p>
+
+<h2>3.1 Step 1: Solution and Project Initialization</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Terminal / Shell</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">CLI Initialization Commands</small></span>
+            <span class="code-lang-badge">BASH</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #8B949E; font-style: italic"># 1. Create root directory and navigate into it</span>
+mkdir<span style="color: #6E7681"> </span>SistemaRestaurante
+<span style="color: #E6EDF3">cd</span><span style="color: #6E7681"> </span>SistemaRestaurante
+
+<span style="color: #8B949E; font-style: italic"># 2. Create the .NET solution file</span>
+dotnet<span style="color: #6E7681"> </span>new<span style="color: #6E7681"> </span>sln<span style="color: #6E7681"> </span>-n<span style="color: #6E7681"> </span>SistemaRestaurante
+
+<span style="color: #8B949E; font-style: italic"># 3. Create the Web/Kestrel project for the Server</span>
+dotnet<span style="color: #6E7681"> </span>new<span style="color: #6E7681"> </span>web<span style="color: #6E7681"> </span>-n<span style="color: #6E7681"> </span>Restaurante
+
+<span style="color: #8B949E; font-style: italic"># 4. Create the two Console projects for the clients</span>
+dotnet<span style="color: #6E7681"> </span>new<span style="color: #6E7681"> </span>console<span style="color: #6E7681"> </span>-n<span style="color: #6E7681"> </span>Repartidor
+dotnet<span style="color: #6E7681"> </span>new<span style="color: #6E7681"> </span>console<span style="color: #6E7681"> </span>-n<span style="color: #6E7681"> </span>Cliente
+
+<span style="color: #8B949E; font-style: italic"># 5. Attach all three projects to the solution</span>
+dotnet<span style="color: #6E7681"> </span>sln<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Restaurante/Restaurante.csproj
+dotnet<span style="color: #6E7681"> </span>sln<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Repartidor/Repartidor.csproj
+dotnet<span style="color: #6E7681"> </span>sln<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Cliente/Cliente.csproj
+
+<span style="color: #8B949E; font-style: italic"># 6. Create the shared directory for Protocol Buffers contracts</span>
+mkdir<span style="color: #6E7681"> </span>Protos
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h2>3.2 Step 2: Installing gRPC NuGet Packages</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Terminal / Shell</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">NuGet Package Installation Commands</small></span>
+            <span class="code-lang-badge">BASH</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #8B949E; font-style: italic"># 1. Server package (includes Kestrel HTTP/2 engine and server-side protoc code generator):</span>
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Restaurante<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Grpc.AspNetCore
+
+<span style="color: #8B949E; font-style: italic"># 2. Delivery worker packages (HTTP/2 client, Protobuf runtime, and protoc tools):</span>
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Repartidor<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Grpc.Net.Client
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Repartidor<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Google.Protobuf
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Repartidor<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Grpc.Tools
+
+<span style="color: #8B949E; font-style: italic"># 3. Client packages:</span>
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Cliente<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Grpc.Net.Client
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Cliente<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Google.Protobuf
+dotnet<span style="color: #6E7681"> </span>add<span style="color: #6E7681"> </span>Cliente<span style="color: #6E7681"> </span>package<span style="color: #6E7681"> </span>Grpc.Tools
+</pre></div>
+
+        </div>
+    </div>
+    
+
+
+    <div class="callout callout-step avoid-break">
+        <div class="callout-title">🛠️ Resulting Directory Structure</div>
+        <div class="callout-body">Verify that the folder layout in your workspace matches the following tree structure:<br>
+<pre style='margin: 4px 0; font-family: monospace; font-size: 7.8pt;'>
+SistemaRestaurante/
+├── SistemaRestaurante.slnx (or .sln)
+├── Protos/
+│   └── restaurante.proto
+├── Restaurante/
+│   ├── Restaurante.csproj
+│   ├── Program.cs
+│   ├── Pedido.cs
+│   └── RestauranteService.cs
+├── Repartidor/
+│   ├── Repartidor.csproj
+│   └── Program.cs
+└── Cliente/
+    ├── Cliente.csproj
+    ├── Program.cs
+    └── RestauranteClienteService.cs
+</pre></div>
+    </div>
+    
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 4: THE COMMUNICATION CONTRACT -->
+<!-- ========================================== -->
+<h1>4. The Communication Contract: Protos/restaurante.proto</h1>
+
+<p>
+In gRPC, the <code class="inline">.proto</code> file is the <strong>Single Source of Truth</strong>. Both the server implementation and client callers are synthesized from this IDL specification.
+</p>
+
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Protos/restaurante.proto</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Protobuf Service & Message Definitions</small></span>
+            <span class="code-lang-badge">PROTO</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">syntax</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"proto3"</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">option</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">csharp_namespace</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"Restaurante"</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">import</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"google/protobuf/empty.proto"</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">service</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">RestauranteService</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">rpc</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">HacerPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(PedidoRequest)</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">returns</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(PedidoResponse);</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">rpc</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConsultarEstadoPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(ConsultaRequest)</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">returns</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(EstadoResponse);</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">rpc</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">TomarPedidoParaRepartir</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(google.protobuf.Empty)</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">returns</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(PedidoResponse);</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">rpc</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConsultarPlatosPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(ConsultaRequest)</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">returns</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(PedidoResponse);</span>
+<span style="color: #E6EDF3">}</span>
+
+<span style="color: #FF7B72">message</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">PedidoRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">repeated</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">PlatoPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">platos</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">1</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">int32</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">distancia</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">2</span><span style="color: #E6EDF3">;</span>
+<span style="color: #E6EDF3">}</span>
+
+<span style="color: #FF7B72">message</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">PlatoPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">string</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">nombre</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">1</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">int32</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">cantidad</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">2</span><span style="color: #E6EDF3">;</span>
+<span style="color: #E6EDF3">}</span>
+
+<span style="color: #FF7B72">message</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">PedidoResponse</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">int32</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">id_pedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">1</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">string</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">2</span><span style="color: #E6EDF3">;</span>
+<span style="color: #E6EDF3">}</span>
+
+<span style="color: #FF7B72">message</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">ConsultaRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">int32</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">id_pedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">1</span><span style="color: #E6EDF3">;</span>
+<span style="color: #E6EDF3">}</span>
+
+<span style="color: #FF7B72">message</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">EstadoResponse</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">string</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">estado</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">1</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">string</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">2</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">int32</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">tiempo_estimado</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">3</span><span style="color: #E6EDF3">;</span>
+<span style="color: #E6EDF3">}</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h2>4.1 Line-by-Line Breakdown of the Protobuf Specification</h2>
+
+<ul>
+    <li><code class="inline">syntax = "proto3";</code> (Line 1): Specifies version 3 of Protocol Buffers syntax. In <code class="inline">proto3</code>, fields are optional by default and the legacy <code class="inline">required</code> keyword is omitted, ensuring seamless forward and backward compatibility.</li>
+    <li><code class="inline">option csharp_namespace = "Restaurante";</code> (Line 2): Determines the C# namespace where all auto-generated classes will reside.</li>
+    <li><code class="inline">import "google/protobuf/empty.proto";</code> (Line 3): In gRPC, every RPC method must take exactly one message parameter and return one message. Methods cannot return <code class="inline">void</code>. Google provides the standard <code class="inline">google.protobuf.Empty</code> type for parameterless methods.</li>
+    <li><strong>Service Definition <code class="inline">RestauranteService</code> (Lines 5-10):</strong> Declares 4 unary RPC procedures:
+        <ol>
+            <li><code class="inline">HacerPedido (PedidoRequest) returns (PedidoResponse);</code>: Client submits dish items and delivery distance; server returns the assigned unique order ID.</li>
+            <li><code class="inline">ConsultarEstadoPedido (ConsultaRequest) returns (EstadoResponse);</code>: Queries current order lifecycle status given its ID.</li>
+            <li><code class="inline">TomarPedidoParaRepartir (google.protobuf.Empty) returns (PedidoResponse);</code>: Invoked by delivery worker to claim the next pending order.</li>
+            <li><code class="inline">ConsultarPlatosPedido (ConsultaRequest) returns (PedidoResponse);</code>: Returns the formatted list of dishes for a given order ID.</li>
+        </ol>
+    </li>
+    <li><strong>Collections with <code class="inline">repeated</code> (Line 13):</strong> <code class="inline">repeated PlatoPedido platos = 1;</code> generates a strongly typed collection in C# (<code class="inline">Google.Protobuf.Collections.RepeatedField&lt;PlatoPedido&gt;</code>).</li>
+    <li><strong>Field Tags (<code class="inline">= 1, = 2</code>):</strong> 
+        
+    <div class="callout callout-exam avoid-break">
+        <div class="callout-title">🎓 Exam Question: What do the numbers '= 1' and '= 2' signify in Protobuf fields?</div>
+        <div class="callout-body">They are <strong>NOT default values or variable initializers</strong>! They are <strong>unique binary field tags</strong>. On the wire, gRPC does not transmit field name strings like 'distancia'; it sends the integer tag <code class='inline'>2</code> encoded in a single byte. Therefore, <strong>field numbers must never be modified once a service is deployed</strong>, as changing them breaks wire compatibility with existing clients.</div>
+    </div>
+    
+    </li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 5: CSPROJ CONFIGURATION -->
+<!-- ========================================== -->
+<h1>5. Project Configuration (.csproj Files)</h1>
+
+<p>
+Protobuf code generation is coordinated through MSBuild targets provided by the <code class="inline">Grpc.Tools</code> package.
+</p>
+
+<h2>5.1 Server Configuration: Restaurante.csproj</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Restaurante/Restaurante.csproj</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">gRPC Server Project File</small></span>
+            <span class="code-lang-badge">XML</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #7EE787">&lt;Project</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Sdk=</span><span style="color: #A5D6FF">"Microsoft.NET.Sdk.Web"</span><span style="color: #7EE787">&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;PropertyGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;OutputType&gt;</span>Exe<span style="color: #7EE787">&lt;/OutputType&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;TargetFramework&gt;</span>net10.0<span style="color: #7EE787">&lt;/TargetFramework&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;ImplicitUsings&gt;</span>enable<span style="color: #7EE787">&lt;/ImplicitUsings&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;Nullable&gt;</span>enable<span style="color: #7EE787">&lt;/Nullable&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/PropertyGroup&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;ItemGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Grpc.AspNetCore"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"2.84.0"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;ItemGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;Protobuf</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"..\Protos\restaurante.proto"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcServices=</span><span style="color: #A5D6FF">"Server"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #7EE787">&lt;/Project&gt;</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h2>5.2 Delivery Worker Configuration: Repartidor.csproj</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Repartidor/Repartidor.csproj</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Delivery Worker (Client) Project File</small></span>
+            <span class="code-lang-badge">XML</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #7EE787">&lt;Project</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Sdk=</span><span style="color: #A5D6FF">"Microsoft.NET.Sdk"</span><span style="color: #7EE787">&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;PropertyGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;OutputType&gt;</span>Exe<span style="color: #7EE787">&lt;/OutputType&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;TargetFramework&gt;</span>net10.0<span style="color: #7EE787">&lt;/TargetFramework&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;ImplicitUsings&gt;</span>enable<span style="color: #7EE787">&lt;/ImplicitUsings&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;Nullable&gt;</span>enable<span style="color: #7EE787">&lt;/Nullable&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/PropertyGroup&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;ItemGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Google.Protobuf"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"3.36.2"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Grpc.Net.Client"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"2.84.0"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Grpc.Tools"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"2.84.0"</span><span style="color: #7EE787">&gt;</span>
+<span style="color: #6E7681">      </span><span style="color: #7EE787">&lt;IncludeAssets&gt;</span>runtime;<span style="color: #6E7681"> </span>build;<span style="color: #6E7681"> </span>native;<span style="color: #6E7681"> </span>contentfiles;<span style="color: #6E7681"> </span>analyzers;<span style="color: #6E7681"> </span>buildtransitive<span style="color: #7EE787">&lt;/IncludeAssets&gt;</span>
+<span style="color: #6E7681">      </span><span style="color: #7EE787">&lt;PrivateAssets&gt;</span>all<span style="color: #7EE787">&lt;/PrivateAssets&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;/PackageReference&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;ItemGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;Protobuf</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"..\Protos\restaurante.proto"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcServices=</span><span style="color: #A5D6FF">"Client"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #7EE787">&lt;/Project&gt;</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h2>5.3 Interactive Client Configuration: Cliente.csproj</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Cliente/Cliente.csproj</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Interactive Client Project File</small></span>
+            <span class="code-lang-badge">XML</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #7EE787">&lt;Project</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Sdk=</span><span style="color: #A5D6FF">"Microsoft.NET.Sdk"</span><span style="color: #7EE787">&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;PropertyGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;OutputType&gt;</span>Exe<span style="color: #7EE787">&lt;/OutputType&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;TargetFramework&gt;</span>net10.0<span style="color: #7EE787">&lt;/TargetFramework&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;ImplicitUsings&gt;</span>enable<span style="color: #7EE787">&lt;/ImplicitUsings&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;Nullable&gt;</span>enable<span style="color: #7EE787">&lt;/Nullable&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/PropertyGroup&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;ItemGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Google.Protobuf"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"3.36.2"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Grpc.Net.Client"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"2.84.0"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;PackageReference</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"Grpc.Tools"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Version=</span><span style="color: #A5D6FF">"2.84.0"</span><span style="color: #7EE787">&gt;</span>
+<span style="color: #6E7681">      </span><span style="color: #7EE787">&lt;IncludeAssets&gt;</span>runtime;<span style="color: #6E7681"> </span>build;<span style="color: #6E7681"> </span>native;<span style="color: #6E7681"> </span>contentfiles;<span style="color: #6E7681"> </span>analyzers;<span style="color: #6E7681"> </span>buildtransitive<span style="color: #7EE787">&lt;/IncludeAssets&gt;</span>
+<span style="color: #6E7681">      </span><span style="color: #7EE787">&lt;PrivateAssets&gt;</span>all<span style="color: #7EE787">&lt;/PrivateAssets&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;/PackageReference&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;ItemGroup&gt;</span>
+<span style="color: #6E7681">    </span><span style="color: #7EE787">&lt;Protobuf</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Include=</span><span style="color: #A5D6FF">"..\Protos\restaurante.proto"</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcServices=</span><span style="color: #A5D6FF">"Client"</span><span style="color: #6E7681"> </span><span style="color: #7EE787">/&gt;</span>
+<span style="color: #6E7681">  </span><span style="color: #7EE787">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #7EE787">&lt;/Project&gt;</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+
+    <div class="callout callout-why avoid-break">
+        <div class="callout-title">💡 The Technical Rationale: 'GrpcServices=Server' vs 'GrpcServices=Client'</div>
+        <div class="callout-body">During <code class='inline'>dotnet build</code>, the MSBuild task runs the native Google compiler (<code class='inline'>protoc</code>):<br>
+• <code class='inline'>GrpcServices="Server"</code>: Generates the abstract base class <code class='inline'>RestauranteServiceBase</code>, containing virtual methods for the server to <code class='inline'>override</code> with business logic.<br>
+• <code class='inline'>GrpcServices="Client"</code>: Generates the concrete client stub <code class='inline'>RestauranteServiceClient</code>, providing asynchronous wire invocation methods (<code class='inline'>HacerPedidoAsync</code>, etc.).<br>
+Omitting or swapping this attribute causes build errors because the required classes will not exist in the assembly.</div>
+    </div>
+    
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 6: THE SERVER (RESTAURANTE) -->
+<!-- ========================================== -->
+<h1>6. The Server Implementation (Restaurante)</h1>
+
+<p>
+The server manages order state across their complete lifecycle, configuring Kestrel HTTP/2 hosting and coordinating concurrent multithreaded synchronization.
+</p>
+
+<h2>6.1 Internal Domain Model: Restaurante/Pedido.cs</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Restaurante/Pedido.cs</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Internal Order Domain Entity</small></span>
+            <span class="code-lang-badge">CSHARP</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Collections.Generic</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Restaurante</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">namespace</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">RestauranteApp</span>
+<span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">class</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">Pedido</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Id</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">get</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">set</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">List</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PlatoPedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Platos</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">get</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">set</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">}</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">List</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PlatoPedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #E6EDF3">();</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Distancia</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">get</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">set</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">string</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Estado</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">get</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">set</span><span style="color: #E6EDF3">;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">}</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"En preparacion"</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #E6EDF3">}</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h2>6.2 Host Setup and Kestrel Configuration: Restaurante/Program.cs</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Restaurante/Program.cs</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Kestrel Host & Dependency Injection Setup</small></span>
+            <span class="code-lang-badge">CSHARP</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Microsoft.AspNetCore.Builder</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Microsoft.AspNetCore.Hosting</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Microsoft.AspNetCore.Server.Kestrel.Core</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Microsoft.Extensions.DependencyInjection</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">RestauranteApp</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">builder</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">WebApplication.CreateBuilder(args);</span>
+
+<span style="color: #8B949E; font-style: italic">// Configurar Kestrel para permitir HTTP/2 sin TLS</span>
+<span style="color: #E6EDF3">builder.WebHost.ConfigureKestrel(options</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=&gt;</span>
+<span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #8B949E; font-style: italic">// Configurar el servidor para escuchar en HTTP/2 sin TLS en el puerto 5000</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">options.ListenLocalhost(</span><span style="color: #A5D6FF">5000</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">o</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">o.Protocols</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">HttpProtocols.Http2);</span>
+<span style="color: #E6EDF3">});</span>
+
+<span style="color: #8B949E; font-style: italic">// Agregar servicios gRPC</span>
+<span style="color: #E6EDF3">builder.Services.AddGrpc();</span>
+
+<span style="color: #8B949E; font-style: italic">// Registrar RestauranteService como Singleton para mantener el estado</span>
+<span style="color: #E6EDF3">builder.Services.AddSingleton</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">RestauranteService</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #E6EDF3">();</span>
+
+<span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">app</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">builder.Build();</span>
+
+<span style="color: #8B949E; font-style: italic">// Registra el servicio gRPC para que pueda recibir y gestionar invocaciones remotas.</span>
+<span style="color: #E6EDF3">app.MapGrpcService</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">RestauranteService</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #E6EDF3">();</span>
+
+<span style="color: #8B949E; font-style: italic">// Configurar una página de inicio simple</span>
+<span style="color: #E6EDF3">app.MapGet(</span><span style="color: #A5D6FF">"/"</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">()</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=&gt;</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"Servidor gRPC del Restaurante ejecutándose..."</span><span style="color: #E6EDF3">);</span>
+
+<span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"Iniciando servidor gRPC del Restaurante..."</span><span style="color: #E6EDF3">);</span>
+<span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"Presiona Ctrl+C para salir"</span><span style="color: #E6EDF3">);</span>
+
+<span style="color: #E6EDF3">app.Run();</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h3>Deep Architectural Breakdown of Host Configuration</h3>
+<ul>
+    <li>
+        <strong>HTTP/2 Without TLS (Lines 10-15):</strong> 
+        gRPC standard specification expects HTTP/2 over TLS negotiated via ALPN. In local development environments without SSL certificates, Kestrel must be explicitly instructed to accept <strong>h2c (HTTP/2 Cleartext)</strong> on port 5000:
+        <code class="inline">options.ListenLocalhost(5000, o =&gt; o.Protocols = HttpProtocols.Http2);</code>.
+    </li>
+    <li>
+        <strong>The Mandatory Singleton Lifetime (Line 21):</strong> 
+        <code class="inline">builder.Services.AddSingleton&lt;RestauranteService&gt;();</code>
+        
+    <div class="callout callout-exam avoid-break">
+        <div class="callout-title">🎓 Crucial Exam Question: Why Register RestauranteService as a Singleton?</div>
+        <div class="callout-body">By default, ASP.NET Core gRPC registers services with a <strong>Transient</strong> lifecycle (a brand-new service instance is instantiated per incoming RPC call and garbage collected upon completion).<br>
+        If <code class='inline'>RestauranteService</code> were Transient, each invocation of <code class='inline'>HacerPedido</code> or <code class='inline'>TomarPedidoParaRepartir</code> would instantiate a new empty queue and dictionary. All orders would vanish immediately!<br>
+        Registering as a <strong>Singleton</strong> guarantees that the IoC container keeps a <strong>single shared instance in memory</strong> throughout the server's lifecycle, allowing all concurrent clients and delivery workers to share the same queues, dictionaries, and semaphores.</div>
+    </div>
+    
+    </li>
+    <li>
+        <strong>Service Routing (Line 26):</strong> 
+        <code class="inline">app.MapGrpcService&lt;RestauranteService&gt;();</code> connects Kestrel's HTTP/2 pipeline to our service class endpoints.
+    </li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>6.3 Business Logic and Concurrency: Restaurante/RestauranteService.cs</h2>
+<p>
+The full server implementation handling thread safety, semaphores, and error dispatching:
+</p>
+
+    <div class="code-card ">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Restaurante/RestauranteService.cs</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">gRPC Service with Concurrency Control</small></span>
+            <span class="code-lang-badge">CSHARP</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Grpc.Core</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Collections.Concurrent</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Threading</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Threading.Tasks</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Linq</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Google.Protobuf.WellKnownTypes</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Restaurante</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Microsoft.Extensions.Logging</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">namespace</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">RestauranteApp</span>
+<span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">class</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">RestauranteService</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">:</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Restaurante.RestauranteService.RestauranteServiceBase</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">readonly</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ILogger</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">RestauranteService</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_logger;</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">readonly</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConcurrentQueue</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">Pedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_ordersQueue;</span>
+<span style="color: #6E7681">        </span><span style="color: #8B949E; font-style: italic">// Añadimos un diccionario para recordar todos los pedidos históricos, </span>
+<span style="color: #6E7681">        </span><span style="color: #8B949E; font-style: italic">// ya que la cola los elimina cuando el repartidor los toma.</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">readonly</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConcurrentDictionary</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #FF7B72">int</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Pedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_allOrders;</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">const</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">MaxQueueCapacity</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">10</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">readonly</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">SemaphoreSlim</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_readyOrdersSemaphore;</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">readonly</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">object</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_takeLock;</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_orderID;</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">RestauranteService</span><span style="color: #E6EDF3">(ILogger</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">RestauranteService</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">logger)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_logger</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">logger;</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_ordersQueue</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConcurrentQueue</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">Pedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #E6EDF3">();</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_allOrders</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConcurrentDictionary</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #FF7B72">int</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Pedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #E6EDF3">();</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_readyOrdersSemaphore</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">SemaphoreSlim(</span><span style="color: #A5D6FF">0</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_takeLock</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">object</span><span style="color: #E6EDF3">();</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_orderID</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">1</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">override</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PedidoResponse</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">HacerPedido(PedidoRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ServerCallContext</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">context)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">lock</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(_takeLock)</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// lock the access to the queue to prevent race conditions</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(_ordersQueue.Count</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">MaxQueueCapacity)</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// checks if the queue is full</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Pedido</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// creates a new pedido with the given data</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Id</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_orderID,</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Distancia</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request.Distancia,</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Platos</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request.Platos.ToList(),</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Estado</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"En preparacion"</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// sets the initial state of the pedido to "En preparacion"</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">};</span>
+
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">_ordersQueue.Enqueue(pedido);</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// adds the pedido to the queue</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">_allOrders.TryAdd(pedido.Id,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido);</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// adds the pedido to the dictionary</span>
+<span style="color: #6E7681">                    </span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">_logger.LogInformation(</span><span style="color: #A5D6FF">$"Recibido un nuevo pedido con ID {_orderID}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">_orderID</span><span style="color: #FF7B72; font-weight: bold">++</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">                    </span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">_readyOrdersSemaphore.Release();</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// releases the semaphore to indicate that there is a new order</span>
+
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">return</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task.FromResult(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">PedidoResponse</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// returns the response to the client</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">IdPedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido.Id,</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">$"Pedido {pedido.Id} recibido, tiempo estimado: {pedido.Distancia * 5} mins"</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">});</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">throw</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">RpcException</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Status(StatusCode.ResourceExhausted,</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"La cola está llena"</span><span style="color: #E6EDF3">));</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">override</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">EstadoResponse</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConsultarEstadoPedido(ConsultaRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ServerCallContext</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">context)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #8B949E; font-style: italic">// Buscamos en el historial global en lugar de la cola,</span>
+<span style="color: #6E7681">            </span><span style="color: #8B949E; font-style: italic">// porque si el repartidor lo ha tomado, ya no está en la cola!</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(_allOrders.TryGetValue(request.IdPedido,</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">out</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido))</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// tries to get the pedido from the dictionary</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">return</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task.FromResult(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">EstadoResponse</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// returns the response to the client</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Estado</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido.Estado,</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">$"Su pedido está {pedido.Estado}"</span><span style="color: #E6EDF3">,</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">TiempoEstimado</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido.Distancia</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">*</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">5</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// calculates the estimated time for the delivery</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">});</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">else</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">throw</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">RpcException</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Status(StatusCode.NotFound,</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"El pedido no existe"</span><span style="color: #E6EDF3">));</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// throws an exception if the pedido is not found in the dictionary</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">override</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">async</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PedidoResponse</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">TomarPedidoParaRepartir(Empty</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ServerCallContext</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">context)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_readyOrdersSemaphore.WaitAsync();</span>
+
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">lock</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(_takeLock)</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(_ordersQueue.TryDequeue(</span><span style="color: #FF7B72">out</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido))</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">pedido.Estado</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"En reparto"</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">return</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">PedidoResponse</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">IdPedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido.Id,</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"Pedido en reparto"</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">};</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">throw</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">RpcException</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Status(StatusCode.NotFound,</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"No hay pedidos disponibles"</span><span style="color: #E6EDF3">));</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">override</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PedidoResponse</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConsultarPlatosPedido(ConsultaRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ServerCallContext</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">context)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(_allOrders.TryGetValue(request.IdPedido,</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">out</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido))</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">string</span><span style="color: #E6EDF3">.Join(</span><span style="color: #A5D6FF">", "</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido.Platos.Select(p</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=&gt;</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">$"{p.Cantidad}x {p.Nombre}"</span><span style="color: #E6EDF3">));</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">return</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task.FromResult(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">PedidoResponse</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">IdPedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">pedido.Id,</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Mensaje</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">mensaje</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">});</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">else</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">throw</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">RpcException</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Status(StatusCode.NotFound,</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"El pedido no existe"</span><span style="color: #E6EDF3">));</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #E6EDF3">}</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<div class="page-break"></div>
+
+<h3>Exhaustive Concurrency Breakdown in RestauranteService</h3>
+
+<h3>1. Data Structures and Synchronization Primitives (Lines 15-22):</h3>
+<ul>
+    <li><code class="inline">ConcurrentQueue&lt;Pedido&gt; _ordersQueue;</code>: Thread-safe FIFO queue storing orders waiting to be claimed by delivery workers.</li>
+    <li><code class="inline">ConcurrentDictionary&lt;int, Pedido&gt; _allOrders;</code>: 
+        
+    <div class="callout callout-why avoid-break">
+        <div class="callout-title">💡 The Need for the Historical ConcurrentDictionary</div>
+        <div class="callout-body">When a delivery worker invokes <code class='inline'>TomarPedidoParaRepartir</code>, the order is <strong>dequeued</strong> (removed from <code class='inline'>_ordersQueue</code>). If a client subsequently calls <code class='inline'>ConsultarEstadoPedido(id)</code> and we only had the queue, the server would return 'Not Found'!<br>
+        <code class='inline'>_allOrders</code> functions as the <strong>persistent in-memory history log</strong>, keeping the object accessible in $O(1)$ constant time so its lifecycle state ('En reparto') can be monitored at all times.</div>
+    </div>
+    
+    </li>
+    <li><code class="inline">SemaphoreSlim _readyOrdersSemaphore = new SemaphoreSlim(0);</code>: 
+        Counting semaphore initialized to <strong>0 permits</strong>. When no orders exist, any delivery worker calling <code class="inline">WaitAsync()</code> suspends asynchronously. When an order is enqueued, <code class="inline">Release()</code> increments the permit count, immediately awakening a worker.
+    </li>
+    <li><code class="inline">object _takeLock = new object();</code>: 
+        
+    <div class="callout callout-warning avoid-break">
+        <div class="callout-title">⚠️ Why is 'lock' necessary if ConcurrentQueue is already thread-safe?</div>
+        <div class="callout-body">Concurrent collections only guarantee atomicity for isolated single operations (<code class='inline'>Enqueue</code> or <code class='inline'>TryDequeue</code>).<br>
+        However, the sequence:
+        <code class='inline'>if (_ordersQueue.Count &lt; MaxQueueCapacity) {{ _ordersQueue.Enqueue(...); }}</code>
+        is a compound <strong>Check-Then-Act</strong> operation. If two threads read <code class='inline'>Count = 9</code> simultaneously, both pass the <code class='inline'>if</code> condition and enqueue, pushing the count to 11. The <code class='inline'>lock (_takeLock)</code> ensures the check and enqueue occur as an indivisible atomic critical section.</div>
+    </div>
+    
+    </li>
+</ul>
+
+<h3>2. RPC Method Analysis:</h3>
+<ul>
+    <li>
+        <strong><code class="inline">HacerPedido</code> (Lines 34-65):</strong>
+        Acquires <code class="inline">lock (_takeLock)</code>, checks if <code class="inline">_ordersQueue.Count &lt; MaxQueueCapacity</code>. If capacity exists, creates the order, adds it to both the queue and the historical dictionary, calls <code class="inline">_readyOrdersSemaphore.Release()</code>, and returns the response. If the queue is saturated (10 orders), throws <code class="inline">RpcException(new Status(StatusCode.ResourceExhausted, "La cola está llena"))</code>.
+    </li>
+    <li>
+        <strong><code class="inline">ConsultarEstadoPedido</code> (Lines 67-84):</strong>
+        Looks up the order in <code class="inline">_allOrders</code> via <code class="inline">TryGetValue</code>. If found, returns the status and estimated delivery time (<code class="inline">distancia * 5</code> mins). If absent, throws an RPC error with <code class="inline">StatusCode.NotFound</code>.
+    </li>
+    <li>
+        <strong><code class="inline">TomarPedidoParaRepartir</code> (Lines 86-104):</strong>
+        Calls <code class="inline">await _readyOrdersSemaphore.WaitAsync();</code>, suspending without blocking OS threads if no orders are available. Once a permit is granted, locks <code class="inline">_takeLock</code>, calls <code class="inline">_ordersQueue.TryDequeue</code>, updates the status to "En reparto", and returns the order.
+    </li>
+    <li>
+        <strong><code class="inline">ConsultarPlatosPedido</code> (Lines 106-120):</strong>
+        Retrieves the order from the dictionary and formats the list of dishes into a readable string using <code class="inline">string.Join</code>.
+    </li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 7: THE DELIVERY WORKER -->
+<!-- ========================================== -->
+<h1>7. The Consumer Agent (Repartidor)</h1>
+
+<p>
+The delivery agent is a gRPC client operating as a <strong>background daemon worker</strong>. It continuously consumes pending orders in an infinite loop and simulates physical transit.
+</p>
+
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Repartidor/Program.cs</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Asynchronous Worker Loop in Delivery Agent</small></span>
+            <span class="code-lang-badge">CSHARP</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Net.Http</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Threading.Tasks</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Grpc.Net.Client</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Google.Protobuf.WellKnownTypes</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Restaurante</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Grpc.Core</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">namespace</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">RepartidorApp</span>
+<span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">class</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">Program</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">static</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">async</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">Main</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">string</span><span style="color: #E6EDF3">[]</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">args)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">httpHandler</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">HttpClientHandler</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">ServerCertificateCustomValidationCallback</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">HttpClientHandler.DangerousAcceptAnyServerCertificateValidator</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">};</span>
+
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">channel</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcChannel.ForAddress(</span><span style="color: #A5D6FF">"http://localhost:5000"</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcChannelOptions</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">HttpHandler</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">httpHandler</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">});</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">client</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">RestauranteService.RestauranteServiceClient(channel);</span>
+
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"Repartidor iniciado. Esperando pedidos para repartir..."</span><span style="color: #E6EDF3">);</span>
+
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">while</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">true</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">try</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">response</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">client.TomarPedidoParaRepartirAsync(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Empty());</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Asignado] {response.Mensaje} (ID: {response.IdPedido})"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"Entregando..."</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task.Delay(</span><span style="color: #A5D6FF">3000</span><span style="color: #E6EDF3">);</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// Simulate delivery time</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Entregado] Pedido ID: {response.IdPedido} entregado con exito.\n"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">catch</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(RpcException</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ex)</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Error] {ex.Status.Detail}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task.Delay(</span><span style="color: #A5D6FF">2000</span><span style="color: #E6EDF3">);</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// Retry delay</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">catch</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(Exception</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ex)</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Excepcion] No se pudo conectar: {ex.Message}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task.Delay(</span><span style="color: #A5D6FF">3000</span><span style="color: #E6EDF3">);</span><span style="color: #6E7681"> </span><span style="color: #8B949E; font-style: italic">// Retry delay</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #E6EDF3">}</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h2>7.1 Analysis of the Delivery Worker Operation</h2>
+<ul>
+    <li><strong>Channel Instantiation (Line 20):</strong> <code class="inline">GrpcChannel.ForAddress("http://localhost:5000", ...)</code> opens the HTTP/2 connection to the server.</li>
+    <li><strong>Infinite Loop (Line 25):</strong> Runs a continuous <code class="inline">while (true)</code> pull loop.</li>
+    <li><strong>Asynchronous Remote Call (Line 29):</strong> Invokes <code class="inline">await client.TomarPedidoParaRepartirAsync(new Empty())</code>. Because of the server's semaphore, this call remains suspended on the server side without consuming CPU cycles until an order arrives.</li>
+    <li><strong>Transit Simulation (Line 33):</strong> <code class="inline">await Task.Delay(3000);</code> suspends execution for 3 seconds to simulate physical road transit.</li>
+    <li><strong>Fault Tolerance & Retries (Lines 36-45):</strong> If the server is offline or restarts, catches <code class="inline">RpcException</code> and general network exceptions, waiting 2-3 seconds before retrying, preventing process crashes.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 8: THE CLIENT APPLICATION -->
+<!-- ========================================== -->
+<h1>8. The Client Application (Cliente)</h1>
+
+<p>
+The client application cleanly decouples gRPC communication logic from console user interface interactions.
+</p>
+
+<h2>8.1 Communication Service: Cliente/RestauranteClienteService.cs</h2>
+
+    <div class="code-card avoid-break">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Cliente/RestauranteClienteService.cs</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Client Stub Wrapper Service</small></span>
+            <span class="code-lang-badge">CSHARP</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Grpc.Net.Client</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Grpc.Core</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Threading.Tasks</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Collections.Generic</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Restaurante</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">namespace</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">ClienteApp</span>
+<span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">class</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">RestauranteClienteService</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcChannel</span><span style="color: #FF7B72; font-weight: bold">?</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_channel;</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">private</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">RestauranteService.RestauranteServiceClient</span><span style="color: #FF7B72; font-weight: bold">?</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_client;</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">void</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">ConnectAsync</span><span style="color: #E6EDF3">()</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">AppContext.SetSwitch(</span><span style="color: #A5D6FF">"System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport"</span><span style="color: #E6EDF3">,</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">true</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">            </span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_channel</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">GrpcChannel.ForAddress(</span><span style="color: #A5D6FF">"http://localhost:5000"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">_client</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">RestauranteService.RestauranteServiceClient(_channel);</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">async</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">HacerPedidoAsync</span><span style="color: #E6EDF3">(List</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PlatoPedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">platos,</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">distancia)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">PedidoRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Distancia</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">distancia</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">};</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">request.Platos.AddRange(platos);</span>
+
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">try</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">response</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_client</span><span style="color: #FF7B72; font-weight: bold">!</span><span style="color: #E6EDF3">.HacerPedidoAsync(request);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Exito] Pedido ID: {response.IdPedido} - {response.Mensaje}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">catch</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(RpcException</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ex)</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Error] Code: {ex.StatusCode}, Mensaje: {ex.Status.Detail}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">throw</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">public</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">async</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">ConsultarEstadoPedidoAsync</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">idPedido)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">request</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ConsultaRequest</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">IdPedido</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">idPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">};</span>
+<span style="color: #6E7681">            </span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">try</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">response</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">_client</span><span style="color: #FF7B72; font-weight: bold">!</span><span style="color: #E6EDF3">.ConsultarEstadoPedidoAsync(request);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Estado] {response.Estado}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Mensaje] {response.Mensaje}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Tiempo Estimado] {response.TiempoEstimado} mins"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">catch</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(RpcException</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">ex)</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">$"[Error] No se pudo consultar: {ex.Status.Detail}"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #E6EDF3">}</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+
+    <div class="callout callout-warning avoid-break">
+        <div class="callout-title">⚠️ The Security Compatibility Switch: Http2UnencryptedSupport</div>
+        <div class="callout-body">In line 17:
+<code class='inline'>AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);</code><br>
+<strong>Why is this strictly required?</strong> By default, .NET's HTTP socket handler prohibits unencrypted HTTP/2 connections over plain <code class='inline'>http://</code> (h2c) for production security. Without setting this runtime flag, .NET throws an immediate <code class='inline'>InvalidOperationException: The HTTP/2 unencrypted support switch must be set</code>.</div>
+    </div>
+    
+
+<div class="page-break"></div>
+
+<h2>8.2 Interactive Console UI: Cliente/Program.cs</h2>
+
+    <div class="code-card ">
+        <div class="code-header">
+            <span class="code-filename"><span class="code-icon">📄</span> <strong>Cliente/Program.cs</strong> &nbsp;—&nbsp; <small style="color:#94a3b8;">Interactive Console User Interface</small></span>
+            <span class="code-lang-badge">CSHARP</span>
+        </div>
+        <div class="code-body">
+            <div class="highlight" style="background: #0d1117"><pre style="line-height: 125%;"><span></span><span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Collections.Generic</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">System.Threading.Tasks</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Restaurante</span><span style="color: #E6EDF3">;</span>
+<span style="color: #FF7B72">using</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">ClienteApp</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #FF7B72">namespace</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">Cliente</span>
+<span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">    </span><span style="color: #FF7B72">class</span><span style="color: #6E7681"> </span><span style="color: #F0883E; font-weight: bold">Program</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">        </span><span style="color: #FF7B72">static</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">async</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Task</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">Main</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">string</span><span style="color: #E6EDF3">[]</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">args)</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">clientService</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">RestauranteClienteService();</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">clientService.ConnectAsync();</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"Conectado al servidor gRPC."</span><span style="color: #E6EDF3">);</span>
+
+<span style="color: #6E7681">            </span><span style="color: #FF7B72">while</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">true</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"\n=== Menú ==="</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"1. Hacer un pedido"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"2. Consultar estado del pedido"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"3. Salir"</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">Console.Write(</span><span style="color: #A5D6FF">"Opcion: "</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                </span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Console.ReadLine();</span>
+<span style="color: #6E7681">                </span>
+<span style="color: #6E7681">                </span><span style="color: #8B949E; font-style: italic">// Keep asking for an option if it's invalid, without reprinting the whole menu</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">while</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">string</span><span style="color: #E6EDF3">.IsNullOrWhiteSpace(opcion)</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">||</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">!=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"1"</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">&amp;&amp;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">!=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"2"</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">&amp;&amp;</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">!=</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"3"</span><span style="color: #E6EDF3">))</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72; font-weight: bold">!</span><span style="color: #FF7B72">string</span><span style="color: #E6EDF3">.IsNullOrWhiteSpace(opcion))</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Console.WriteLine(</span><span style="color: #A5D6FF">"Opción no válida."</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.Write(</span><span style="color: #A5D6FF">"Opcion: "</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Console.ReadLine();</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">==</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"1"</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">platos</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">List</span><span style="color: #FF7B72; font-weight: bold">&lt;</span><span style="color: #E6EDF3">PlatoPedido</span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #E6EDF3">();</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">while</span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">true</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Console.Write(</span><span style="color: #A5D6FF">"Nombre del plato (o vacio para terminar): "</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                        </span><span style="color: #FF7B72">var</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">nombre</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Console.ReadLine();</span>
+<span style="color: #6E7681">                        </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">string</span><span style="color: #E6EDF3">.IsNullOrWhiteSpace(nombre))</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">break</span><span style="color: #E6EDF3">;</span>
+
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Console.Write(</span><span style="color: #A5D6FF">"Cantidad: "</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                        </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">int</span><span style="color: #E6EDF3">.TryParse(Console.ReadLine(),</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">out</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">cantidad))</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                            </span><span style="color: #E6EDF3">platos.Add(</span><span style="color: #FF7B72">new</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">PlatoPedido</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Nombre</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">nombre,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">Cantidad</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">=</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">cantidad</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">});</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">}</span>
+
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(platos.Count</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">&gt;</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">0</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">Console.Write(</span><span style="color: #A5D6FF">"Distancia de envio: "</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                        </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">int</span><span style="color: #E6EDF3">.TryParse(Console.ReadLine(),</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">out</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">distancia))</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                            </span><span style="color: #FF7B72">try</span>
+<span style="color: #6E7681">                            </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                                </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">clientService.HacerPedidoAsync(platos,</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">distancia);</span>
+<span style="color: #6E7681">                            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                            </span><span style="color: #FF7B72">catch</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">{</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                        </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">else</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">==</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"2"</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">Console.Write(</span><span style="color: #A5D6FF">"ID del pedido: "</span><span style="color: #E6EDF3">);</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(</span><span style="color: #FF7B72">int</span><span style="color: #E6EDF3">.TryParse(Console.ReadLine(),</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">out</span><span style="color: #6E7681"> </span><span style="color: #FF7B72">int</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">id))</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                        </span><span style="color: #FF7B72">await</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">clientService.ConsultarEstadoPedidoAsync(id);</span>
+<span style="color: #6E7681">                    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">                </span><span style="color: #FF7B72">else</span><span style="color: #6E7681"> </span><span style="color: #D2A8FF; font-weight: bold">if</span><span style="color: #6E7681"> </span><span style="color: #E6EDF3">(opcion</span><span style="color: #6E7681"> </span><span style="color: #FF7B72; font-weight: bold">==</span><span style="color: #6E7681"> </span><span style="color: #A5D6FF">"3"</span><span style="color: #E6EDF3">)</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">{</span>
+<span style="color: #6E7681">                    </span><span style="color: #FF7B72">break</span><span style="color: #E6EDF3">;</span>
+<span style="color: #6E7681">                </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">            </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">        </span><span style="color: #E6EDF3">}</span>
+<span style="color: #6E7681">    </span><span style="color: #E6EDF3">}</span>
+<span style="color: #E6EDF3">}</span>
+</pre></div>
+
+        </div>
+    </div>
+    
+
+<h3>Key User Experience Highlights:</h3>
+<ul>
+    <li><strong>Robust Input Validation (Lines 28-36):</strong> If the user enters an invalid menu option, the system warns "Opción no válida" and reprompts without redundantly redrawing the entire menu banner.</li>
+    <li><strong>Dynamic Dish Composition (Lines 40-52):</strong> Allows users to add multiple dishes dynamically until pressing Enter with an empty dish name.</li>
+    <li><strong>Protobuf Collection Mapping (Lines 24-26 in ClienteService):</strong> The native C# <code class="inline">List&lt;PlatoPedido&gt;</code> is appended to the Protobuf repeated field via <code class="inline">request.Platos.AddRange(platos)</code>.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 9: EXECUTION & TEST CASES -->
+<!-- ========================================== -->
+<h1>9. Execution Guide & Edge Test Cases</h1>
+
+<p>
+To demonstrate distributed communication, you must launch all three projects simultaneously in <strong>three separate terminal windows</strong> from the solution root folder.
+</p>
+
+<h2>9.1 Strict Startup Sequence</h2>
+
+<div class="callout callout-step avoid-break">
+    <div class="callout-title">Step 1: Start the Server (Restaurante)</div>
+    <div class="callout-body">
+        In the first terminal, run:
+        <pre style="margin: 4px 0; font-family: monospace; font-size: 8pt;">dotnet run --project Restaurante</pre>
+        <strong>Expected output:</strong> <code class="inline">Iniciando servidor gRPC del Restaurante...</code>
+    </div>
+</div>
+
+<div class="callout callout-step avoid-break">
+    <div class="callout-title">Step 2: Start the Delivery Worker (Repartidor)</div>
+    <div class="callout-body">
+        In the second terminal, run:
+        <pre style="margin: 4px 0; font-family: monospace; font-size: 8pt;">dotnet run --project Repartidor</pre>
+        <strong>Expected output:</strong> <code class="inline">Repartidor iniciado. Esperando pedidos para repartir...</code>
+    </div>
+</div>
+
+<div class="callout callout-step avoid-break">
+    <div class="callout-title">Step 3: Start the Client (Cliente)</div>
+    <div class="callout-body">
+        In the third terminal, run:
+        <pre style="margin: 4px 0; font-family: monospace; font-size: 8pt;">dotnet run --project Cliente</pre>
+        <strong>Expected output:</strong> <code class="inline">Conectado al servidor gRPC.</code> followed by the interactive menu.
+    </div>
+</div>
+
+<h2>9.2 Practical Lab Demonstration Scenarios</h2>
+
+<h3>Scenario 1: Standard Order Placement & Immediate Dispatch</h3>
+<ol>
+    <li>In <strong>Cliente</strong>, choose <code class="inline">1</code>. Enter dish: <em>"Double Burger"</em>, quantity: <em>2</em>. Press Enter with empty text to finish. Distance: <em>4</em>.</li>
+    <li><strong>Client response:</strong> <code class="inline">[Exito] Pedido ID: 1 - Pedido 1 recibido, tiempo estimado: 20 mins</code>.</li>
+    <li><strong>Server log:</strong> <code class="inline">info: Recibido un nuevo pedido con ID 1</code>.</li>
+    <li><strong>Delivery Agent response:</strong>
+        <pre style="margin: 2px 0; font-family: monospace; font-size: 7.8pt;">
+[Asignado] Pedido en reparto (ID: 1)
+Entregando...
+(waits 3 seconds)
+[Entregado] Pedido ID: 1 entregado con exito.</pre>
+    </li>
+    <li>In <strong>Cliente</strong>, during the 3-second transit, select option <code class="inline">2</code> and query ID <code class="inline">1</code>. You will see: <code class="inline">[Estado] En reparto</code>.</li>
+</ol>
+
+<h3>Scenario 2: Bounded Buffer Saturation (Queue Full)</h3>
+<p>
+To demonstrate that bounded queue protection works correctly:
+</p>
+<ol>
+    <li>Stop the <strong>Delivery Worker</strong> by pressing <code class="inline">Ctrl + C</code> in its terminal window (simulating busy workers).</li>
+    <li>From <strong>Cliente</strong>, place 10 consecutive orders (IDs 2 through 11). All 10 will succeed.</li>
+    <li>Attempt to submit the <strong>11th order</strong>.</li>
+    <li><strong>Result:</strong> The server rejects the order and the client prints:
+        <pre style="margin: 2px 0; font-family: monospace; font-size: 7.8pt; color: #b91c1c;">
+[Error] Code: ResourceExhausted, Mensaje: La cola está llena</pre>
+    </li>
+    <li>Restart the Delivery Worker (<code class="inline">dotnet run --project Repartidor</code>). Watch it immediately drain the backlog one by one without losing any orders.</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 10: BANK OF 10 EXAM QUESTIONS -->
+<!-- ========================================== -->
+<h1>10. Bank of 10 Typical Oral Exam Questions</h1>
+
+<p>
+Below are the 10 most common conceptual questions asked by university professors during project defense evaluations, accompanied by model answers:
+</p>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q1: Why does gRPC use HTTP/2 instead of HTTP/1.1, and what advantages does it provide here?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> HTTP/1.1 suffers from application-layer Head-of-Line Blocking: each request requires its own TCP connection or waits sequentially. HTTP/2 introduces <strong>multiplexed binary bidirectional streams</strong> over a single persistent TCP socket. This allows status queries and new orders to travel concurrently over the same connection without blocking each other, alongside HPACK header compression.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q2: Why must RestauranteService be registered as a Singleton in Dependency Injection?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> By default, ASP.NET Core registers services as Transient (instantiated per call and destroyed upon completion). Our server maintains <strong>in-memory state</strong> (the queue, dictionary, and semaphore). If it were Transient, each RPC invocation would run on a fresh, empty instance, causing state to be lost immediately.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q3: Why is SemaphoreSlim used instead of a polling loop in the delivery worker?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> Polling with <code class="inline">Thread.Sleep</code> wastes CPU cycles and adds artificial latency. <code class="inline">SemaphoreSlim.WaitAsync()</code> provides <strong>reactive, non-blocking synchronization</strong>: the delivery worker yields its thread back to the runtime thread pool and is only reactivated when a client produces an order via <code class="inline">Release()</code>.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q4: If ConcurrentQueue is already thread-safe, why is 'lock (_takeLock)' required?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> Concurrent collections only guarantee atomic safety for isolated single operations (<code class="inline">Enqueue</code> or <code class="inline">TryDequeue</code>). Checking capacity and then enqueuing (<code class="inline">if (_ordersQueue.Count &lt; MaxQueueCapacity) Enqueue()</code>) is a compound <em>Check-Then-Act</em> operation. Two threads checking simultaneously when count is 9 would both succeed, resulting in 11 items. The <code class="inline">lock</code> makes the check-and-insert an indivisible atomic critical section.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q5: Why do we maintain both a queue (_ordersQueue) and a dictionary (_allOrders)?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> They serve distinct roles. The queue implements the dispatch buffer; when a worker claims an order, it is permanently dequeued. If a client queries an order after dispatch, the queue no longer contains it. The dictionary serves as the persistent in-memory historical repository with $O(1)$ lookups, allowing status tracking until final delivery.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q6: What role does the GrpcServices attribute play in .csproj project files?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> It instructs the <code class="inline">protoc</code> compiler which C# artifacts to synthesize. <code class="inline">GrpcServices="Server"</code> generates the abstract base service class containing virtual methods for server overrides. <code class="inline">GrpcServices="Client"</code> generates the client stub containing asynchronous remote call proxies.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q7: Why is 'AppContext.SetSwitch("...Http2UnencryptedSupport", true)' necessary in the client?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> For security reasons, .NET's native HTTP handler (<code class="inline">SocketsHttpHandler</code>) prohibits unencrypted HTTP/2 over plain <code class="inline">http://</code> by default. Setting this switch explicitly permits cleartext HTTP/2 (h2c) for local development on <code class="inline">http://localhost:5000</code>.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q8: How does gRPC handle errors differently than traditional REST APIs?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> While REST relies on generic HTTP status codes (400, 404, 500) and arbitrary body schemas, gRPC uses 16 canonical <code class="inline">StatusCode</code> values (such as <code class="inline">NotFound</code>, <code class="inline">ResourceExhausted</code>, <code class="inline">Unavailable</code>) carried in HTTP/2 trailing headers, throwing a strongly typed <code class="inline">RpcException</code> in client code.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q9: What communication invocation semantics does this system provide?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> gRPC defaults to <strong>At-Most-Once</strong> semantics: if a network failure occurs, the call is not automatically retried to prevent duplicating non-idempotent actions (like placing duplicate orders). Achieving <em>At-Least-Once</em> requires client retries, and <em>Exactly-Once</em> requires idempotency tokens on the server.
+    </div>
+</div>
+
+<div class="callout callout-exam avoid-break">
+    <div class="callout-title">Q10: What streaming modes exist in gRPC and how could streaming improve this lab?</div>
+    <div class="callout-body">
+        <strong>Answer:</strong> gRPC supports 4 modes: Unary (used here), Server Streaming, Client Streaming, and Bidirectional. The <code class="inline">ConsultarEstadoPedido</code> method could be upgraded to a <strong>Server Streaming RPC</strong>: the client subscribes once, and the server pushes live updates ("En preparación" -> "En reparto" -> "Entregado") over an open stream, eliminating manual client polling.
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- MODULE 11: TROUBLESHOOTING CHEATSHEET -->
+<!-- ========================================== -->
+<h1>11. Debugging Cheatsheet & Troubleshooting</h1>
+
+<p>
+Common runtime and compilation issues encountered during development and their fixes:
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Error Message / Symptom</th>
+            <th>Root Cause</th>
+            <th>Immediate Resolution</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code class="inline">Failed to bind to address http://localhost:5000: address already in use</code></td>
+            <td>A previous Restaurant server instance is still running in the background holding port 5000.</td>
+            <td>
+                In PowerShell, terminate the zombie process:<br>
+                <code class="inline">Stop-Process -Name "Restaurante" -Force</code><br>
+                or inspect PID with: <code class="inline">Get-NetTCPConnection -LocalPort 5000</code>.
+            </td>
+        </tr>
+        <tr>
+            <td><code class="inline">The HTTP/2 unencrypted support switch must be set</code></td>
+            <td>The client is connecting over <code class="inline">http://</code> without authorizing cleartext HTTP/2.</td>
+            <td>Add before creating the channel:<br><code class="inline">AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);</code></td>
+        </tr>
+        <tr>
+            <td><code class="inline">Status(StatusCode="Unavailable", Detail="Failed to connect to all addresses")</code></td>
+            <td>The server is not currently running or listening on the expected port.</td>
+            <td>Ensure the server is started first via <code class="inline">dotnet run --project Restaurante</code> and listening on port 5000.</td>
+        </tr>
+        <tr>
+            <td><code class="inline">The type or namespace name 'RestauranteServiceBase' could not be found</code></td>
+            <td>Protobuf file has not been compiled or <code class="inline">GrpcServices="Server"</code> is missing in the project file.</td>
+            <td>Check that <code class="inline">Restaurante.csproj</code> contains <code class="inline">&lt;Protobuf Include="..\Protosestaurante.proto" GrpcServices="Server" /&gt;</code> and run <code class="inline">dotnet build</code>.</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- ========================================== -->
+<!-- MODULE 12: CONCLUSION -->
+<!-- ========================================== -->
+<h2>12. Key Engineering Competencies Acquired</h2>
+<p>
+Upon completing this lab, you have mastered the core pillars of enterprise distributed systems engineering:
+</p>
+<ul>
+    <li>Formal language-agnostic interface design using <strong>Protocol Buffers IDL</strong>.</li>
+    <li>High-performance binary network transport over <strong>HTTP/2 (h2c)</strong>.</li>
+    <li>Thread-safe concurrent coordination with <strong>atomic critical sections, bounded buffers, and asynchronous semaphores</strong>.</li>
+    <li>Distributed component lifecycle control via <strong>Dependency Injection (Singleton)</strong> in .NET 10.</li>
+    <li>Canonical distributed fault handling using <strong>gRPC Status Codes and typed exceptions</strong>.</li>
+</ul>
+
+<div style="margin-top: 35px; text-align: center; border-top: 1px solid #cbd5e1; padding-top: 15px; font-size: 8.5pt; color: #64748b;">
+    <strong>Distributed Systems Laboratory · Practice 2</strong> · Engineered with academic rigor for Computer Science and Engineering degrees.
+</div>
+
+</body>
+</html>
