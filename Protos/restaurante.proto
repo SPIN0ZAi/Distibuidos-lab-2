@@ -22,6 +22,7 @@ message PlatoPedido {
 message PedidoResponse {
     int32 id_pedido = 1;
     string mensaje = 2;
+    int32 distancia = 3;
 }
 
 message ConsultaRequest {

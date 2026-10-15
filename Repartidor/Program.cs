@@ -17,7 +17,7 @@ namespace RepartidorApp
                 ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
 
-            var channel = GrpcChannel.ForAddress("http://172.20.10.3:5000", new GrpcChannelOptions { HttpHandler = httpHandler });
+            var channel = GrpcChannel.ForAddress("http://172.20.10.9:5000", new GrpcChannelOptions { HttpHandler = httpHandler });
             var client = new RestauranteService.RestauranteServiceClient(channel);
 
             Console.WriteLine("Repartidor iniciado. Esperando pedidos para repartir...");
@@ -65,7 +65,17 @@ namespace RepartidorApp
 
         static async Task TomarPedidoParaRepartir(RestauranteService.RestauranteServiceClient client)
         {
-        throw new Exception(); // Eliminar y sustituir por el código que implementa el pseudocódigo
+            try
+                {
+                    var response = await client.TomarPedidoParaRepartirAsync(new Empty());
+                    Console.WriteLine($"ID del pedido recibido: {response.IdPedido}");
+                    Console.WriteLine($"Distancia al destino: {response.Distancia} km"); 
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"ERROR HAPPENED");
+                }
+
         }
 
     }
